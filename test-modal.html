@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Modal</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .card:hover {
+            border-color: #444;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: #141414;
+            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+        }
+        .close {
+            float: right;
+            cursor: pointer;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste de Modal dos Modelos</h1>
+    
+    <div class="card" onclick="openModal('Gemini 3.5 Flash')">
+        <h3>Gemini 3.5 Flash</h3>
+        <p>Mais recente, rápido e eficiente</p>
+    </div>
+    
+    <div class="card" onclick="openModal('GPT-4o')">
+        <h3>GPT-4o</h3>
+        <p>Mais avançado da OpenAI</p>
+    </div>
+    
+    <div id="modal" class="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title">Configurar Modelo</h2>
+            <p>Modal aberto com sucesso!</p>
+            <input type="password" placeholder="API Key..." style="width: 100%; padding: 8px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 8px;">
+            <button onclick="closeModal()" style="background: white; color: black; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer;">Salvar</button>
+        </div>
+    </div>
+
+    <script>
+        function openModal(modelName) {
+            console.log('Abrindo modal para:', modelName);
+            document.getElementById('modal-title').textContent = 'Configurar ' + modelName;
+            document.getElementById('modal').classList.add('show');
+        }
+        
+        function closeModal() {
+            console.log('Fechando modal');
+            document.getElementById('modal').classList.remove('show');
+        }
+        
+        // Teste automático
+        console.log('Página carregada. Testando modal...');
+        setTimeout(() => {
+            console.log('Abrindo modal automaticamente em 2 segundos...');
+            openModal('Teste Automático');
+        }, 2000);
+    </script>
+</body>
+</html>

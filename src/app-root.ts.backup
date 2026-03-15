@@ -2053,7 +2053,11 @@ Entrada do usuário: "${userInput}"`;
                             const isSelected = this.aiProvider === 'gemini' && this.geminiModel === model.id;
                             return html`
                               <button
-                                @click=${(e: Event) => this.handleModelClick('gemini', model.id, model.name, e)}
+                                @click=${() => {
+                                  this.aiProvider = 'gemini';
+                                  this.geminiModel = model.id;
+                                  this.saveSettings();
+                                }}
                                 class="w-full flex items-start gap-3 p-3 rounded-xl border transition-all text-left ${isSelected ? 'bg-white/10 border-white/50' : 'bg-[#1a1a1a] border-[#333] hover:border-[#444]'}"
                               >
                                 <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
@@ -2089,7 +2093,11 @@ Entrada do usuário: "${userInput}"`;
                             const isSelected = this.aiProvider === 'openai' && this.openaiModel === model.id;
                             return html`
                               <button
-                                @click=${(e: Event) => this.handleModelClick('openai', model.id, model.name, e)}
+                                @click=${() => {
+                                  this.aiProvider = 'openai';
+                                  this.openaiModel = model.id;
+                                  this.saveSettings();
+                                }}
                                 class="w-full flex items-start gap-3 p-3 rounded-xl border transition-all text-left ${isSelected ? 'bg-white/10 border-white/50' : 'bg-[#1a1a1a] border-[#333] hover:border-[#444]'}"
                               >
                                 <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
@@ -2124,7 +2132,11 @@ Entrada do usuário: "${userInput}"`;
                             const isSelected = this.aiProvider === 'openai' && this.openaiModel === model.id;
                             return html`
                               <button
-                                @click=${(e: Event) => this.handleModelClick('openai', model.id, model.name, e)}
+                                @click=${() => {
+                                  this.aiProvider = 'openai';
+                                  this.openaiModel = model.id;
+                                  this.saveSettings();
+                                }}
                                 class="w-full flex items-start gap-3 p-3 rounded-xl border transition-all text-left ${isSelected ? 'bg-white/10 border-white/50' : 'bg-[#1a1a1a] border-[#333] hover:border-[#444]'}"
                               >
                                 <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
