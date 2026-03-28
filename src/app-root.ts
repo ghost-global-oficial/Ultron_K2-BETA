@@ -14,6 +14,8 @@ import {
   Cloud, HardDrive, Link, Layers, Settings2, Puzzle, Terminal, MousePointer2, ExternalLink, User, Activity, Database, Coins, Check, Palette,
   Calendar, Cpu, Gift, HelpCircle, Plug, Video, Image, Eye, FileCode, Braces
 } from 'lucide';
+import './components/integration-card';
+import type { IntegrationInfo } from './components/integration-card';
 
 // Declaração de tipo para Electron
 declare global {
@@ -338,6 +340,7 @@ export class AppRoot extends LitElement {
   @state() isAgentLoading: boolean = false;
   @state() isPlusMenuOpen: boolean = false;
   @state() isIntegrationsMenuOpen: boolean = false;
+  @state() selectedIntegration: any = null;
   @state() isSkillsMenuOpen: boolean = false;
   @state() isHashMenuOpen: boolean = false;
   @state() hashMenuPosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -404,6 +407,27 @@ export class AppRoot extends LitElement {
     this.isIntegrationsMenuOpen = !this.isIntegrationsMenuOpen;
   }
 
+  openIntegrationCard(integration: IntegrationInfo) {
+    this.selectedIntegration = integration;
+    this.isIntegrationsMenuOpen = false;
+  }
+
+  closeIntegrationCard() {
+    this.selectedIntegration = null;
+  }
+
+  handleIntegrationConnected(e: CustomEvent) {
+    console.log('Integration connected:', e.detail);
+    this.closeIntegrationCard();
+    // Aqui você pode adicionar lógica adicional, como atualizar o estado da integração
+  }
+
+  handleIntegrationDisconnected(e: CustomEvent) {
+    console.log('Integration disconnected:', e.detail);
+    this.closeIntegrationCard();
+    // Aqui você pode adicionar lógica adicional, como atualizar o estado da integração
+  }
+
   toggleSkillsMenu(e: Event) {
     e.stopPropagation();
     this.isSkillsMenuOpen = !this.isSkillsMenuOpen;
@@ -443,20 +467,76 @@ export class AppRoot extends LitElement {
   renderIntegrationsMenu() {
     if (!this.isIntegrationsMenuOpen) return '';
     
-    const integrations = [
-      { name: 'O Meu Navegador', icon: Globe, connected: true, hasToggle: true },
-      { name: 'Supabase', icon: Zap, connected: true, hasToggle: true, iconColor: 'text-emerald-400' },
-      { name: 'GitHub', icon: Code, connected: false, hasToggle: false },
-      { name: 'Gmail', icon: MessageSquare, connected: false, hasToggle: false },
-      { name: 'Instagram', icon: MessageSquare, connected: false, hasToggle: false, badge: 'Beta' },
-      { name: 'Outlook Mail', icon: MessageSquare, connected: false, hasToggle: false },
+    const integrations: IntegrationInfo[] = [
+      { 
+        id: 'browser',
+        name: 'O Meu Navegador', 
+        icon: Globe, 
+        connected: true, 
+        hasToggle: true,
+        description: 'Controle e automatize seu navegador web para realizar tarefas complexas.',
+        features: ['Automação de navegação', 'Preenchimento de formulários', 'Extração de dados']
+      },
+      { 
+        id: 'supabase',
+        name: 'Supabase', 
+        icon: Zap, 
+        connected: true, 
+        hasToggle: true, 
+        iconColor: 'text-emerald-400',
+        description: 'Backend como serviço com banco de dados PostgreSQL, autenticação e armazenamento.',
+        features: ['Banco de dados em tempo real', 'Autenticação de usuários', 'Armazenamento de arquivos']
+      },
+      { 
+        id: 'github',
+        name: 'GitHub', 
+        icon: Code, 
+        connected: false, 
+        hasToggle: false,
+        provider: 'github',
+        description: 'Gerencie repositórios, issues, pull requests e automatize workflows no GitHub.',
+        features: ['Gestão de repositórios', 'Automação de CI/CD', 'Revisão de código']
+      },
+      { 
+        id: 'gmail',
+        name: 'Gmail', 
+        icon: MessageSquare, 
+        connected: false, 
+        hasToggle: false,
+        provider: 'google',
+        description: 'Envie e receba emails, organize sua caixa de entrada e automatize respostas.',
+        features: ['Envio e recebimento de emails', 'Organização automática', 'Filtros inteligentes']
+      },
+      { 
+        id: 'instagram',
+        name: 'Instagram', 
+        icon: MessageSquare, 
+        connected: false, 
+        hasToggle: false, 
+        badge: 'Beta',
+        description: 'Publique conteúdo, gerencie mensagens e analise métricas do Instagram.',
+        features: ['Publicação automática', 'Gestão de mensagens', 'Análise de métricas']
+      },
+      { 
+        id: 'outlook',
+        name: 'Outlook Mail', 
+        icon: MessageSquare, 
+        connected: false, 
+        hasToggle: false,
+        provider: 'microsoft',
+        description: 'Integração completa com Microsoft Outlook para gestão de emails e calendário.',
+        features: ['Gestão de emails', 'Sincronização de calendário', 'Contatos']
+      },
     ];
 
     return html`
       <div class="absolute top-full left-0 mt-1.5 w-[240px] bg-[#1a1a1a] rounded-lg shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200 border border-white/10">
         <div class="p-1 space-y-0.5">
           ${integrations.map(item => html`
-            <div class="flex items-center justify-between px-2 py-1.5 hover:bg-white/5 rounded transition-all cursor-pointer group">
+            <div 
+              @click=${() => this.openIntegrationCard(item)}
+              class="flex items-center justify-between px-2 py-1.5 hover:bg-white/5 rounded transition-all cursor-pointer group"
+            >
               <div class="flex items-center gap-2">
                 <div class="w-5 h-5 rounded-full bg-[#2a2a2a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#333]">
                   ${renderIcon(item.icon, `w-3 h-3 ${item.iconColor || 'text-gray-400'}`)}
@@ -4558,6 +4638,14 @@ Entrada do usuário: "${userInput}"`;
       ${this.renderFullSettingsModal()}
       ${this.renderApiConfigModal()}
       ${this.renderHashMenu()}
+      ${this.selectedIntegration ? html`
+        <integration-card 
+          .integration=${this.selectedIntegration}
+          @close=${this.closeIntegrationCard}
+          @integration-connected=${this.handleIntegrationConnected}
+          @integration-disconnected=${this.handleIntegrationDisconnected}
+        ></integration-card>
+      ` : ''}
     `;
   }
 }

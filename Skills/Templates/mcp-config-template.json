@@ -1,0 +1,53 @@
+{
+  "name": "nome-do-mcp",
+  "version": "1.0.0",
+  "description": "Descrição do servidor MCP",
+  "type": "mcp-server",
+  "main": "index.js",
+  "capabilities": {
+    "tools": true,
+    "resources": true,
+    "prompts": false
+  },
+  "tools": [
+    {
+      "name": "exemplo_ferramenta",
+      "description": "Descrição da ferramenta",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "parametro1": {
+            "type": "string",
+            "description": "Descrição do parâmetro"
+          }
+        },
+        "required": ["parametro1"]
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "exemplo://recurso",
+      "name": "Recurso de Exemplo",
+      "description": "Descrição do recurso",
+      "mimeType": "application/json"
+    }
+  ],
+  "environment": {
+    "required": [
+      "API_KEY"
+    ],
+    "optional": [
+      "BASE_URL",
+      "TIMEOUT"
+    ]
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest"
+  }
+}

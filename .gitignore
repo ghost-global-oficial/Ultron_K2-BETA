@@ -8,3 +8,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Supabase credentials (NUNCA commitar)
+.kiro/settings/mcp.json
+supabase-credentials.json
+**/supabase-config.ts
