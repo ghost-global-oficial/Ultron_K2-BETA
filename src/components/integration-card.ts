@@ -5,14 +5,15 @@
 
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { OAuthProviderName } from '../oauth/types';
-import { initiateOAuth } from '../oauth/oauth-manager';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import type { OAuthProviderName } from '../oauth/types.js';
+import { initiateOAuth } from '../oauth/initiate-oauth-fixed.js';
 
 export interface IntegrationInfo {
   id: OAuthProviderName | string;
   name: string;
   description: string;
-  icon: any;
+  icon: string; // Caminho da imagem
   iconColor?: string;
   connected: boolean;
   hasToggle?: boolean;
@@ -266,23 +267,48 @@ export class IntegrationCard extends LitElement {
 
     // If it's an OAuth provider, use the OAuth flow
     if (this.integration.provider) {
+      // Listen for OAuth success
+      const handleOAuthSuccess = (event: CustomEvent) => {
+        console.log(`[Integration] OAuth success for ${this.integration.name}`, event.detail);
+        this.isConnecting = false;
+        this.integration.connected = true;
+        this.dispatchEvent(new CustomEvent('integration-connected', {
+          detail: { integration: this.integration, ...event.detail },
+          bubbles: true,
+          composed: true,
+        }));
+        window.removeEventListener('oauth:success', handleOAuthSuccess as any);
+      };
+
+      window.addEventListener('oauth:success', handleOAuthSuccess as any);
+
       initiateOAuth(this.integration.provider)
         .then(() => {
-          console.log(`[Integration] OAuth flow initiated for ${this.integration.name}`);
-          // The OAuth flow will handle the rest
-          setTimeout(() => {
-            this.isConnecting = false;
-          }, 2000);
+          console.log(`[Integration] OAuth flow completed for ${this.integration.name}`);
+          // Check if we got a token
+          const tokenData = sessionStorage.getItem('oauth_token_temp');
+          if (tokenData) {
+            const data = JSON.parse(tokenData);
+            this.integration.connected = true;
+            this.dispatchEvent(new CustomEvent('integration-connected', {
+              detail: { integration: this.integration, ...data },
+              bubbles: true,
+              composed: true,
+            }));
+          }
+          this.isConnecting = false;
         })
         .catch((error) => {
           console.error(`[Integration] Failed to initiate OAuth:`, error);
           alert(`Erro ao conectar: ${error.message}`);
           this.isConnecting = false;
+          window.removeEventListener('oauth:success', handleOAuthSuccess as any);
         });
     } else {
       // For non-OAuth integrations, just simulate connection
       setTimeout(() => {
         this.isConnecting = false;
+        this.integration.connected = true;
         this.dispatchEvent(new CustomEvent('integration-connected', {
           detail: { integration: this.integration },
           bubbles: true,
@@ -315,7 +341,7 @@ export class IntegrationCard extends LitElement {
         <div class="card">
           <div class="card-header">
             <div class="icon-wrapper">
-              ${icon ? html`<div class="${iconColor || 'text-white'}" style="width: 32px; height: 32px;">${icon}</div>` : ''}
+              ${icon ? html`<img src="${icon}" alt="${name}" style="width: 40px; height: 40px; object-fit: contain;" />` : ''}
             </div>
             <div class="header-info">
               <h3 class="integration-name">${name}</h3>

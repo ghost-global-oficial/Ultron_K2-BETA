@@ -1,6 +1,12 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const { fork } = require('child_process');
+
+// Handle external URL opening (for OAuth)
+ipcMain.on('open-external-url', (event, url) => {
+  console.log('[Electron] Opening external URL:', url);
+  shell.openExternal(url);
+});
 
 // ─── ULTRON PC Bridge (WebSocket porta 3002) ──────────────────────────────────
 let bridgeProcess: any = null;

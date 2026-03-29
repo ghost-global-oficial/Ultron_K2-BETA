@@ -471,7 +471,7 @@ export class AppRoot extends LitElement {
       { 
         id: 'browser',
         name: 'O Meu Navegador', 
-        icon: Globe, 
+        icon: '/2944939.webp',
         connected: true, 
         hasToggle: true,
         description: 'Controle e automatize seu navegador web para realizar tarefas complexas.',
@@ -480,7 +480,7 @@ export class AppRoot extends LitElement {
       { 
         id: 'supabase',
         name: 'Supabase', 
-        icon: Zap, 
+        icon: '/supabase.png',
         connected: true, 
         hasToggle: true, 
         iconColor: 'text-emerald-400',
@@ -490,7 +490,7 @@ export class AppRoot extends LitElement {
       { 
         id: 'github',
         name: 'GitHub', 
-        icon: Code, 
+        icon: '/github-icon.webp',
         connected: false, 
         hasToggle: false,
         provider: 'github',
@@ -500,7 +500,7 @@ export class AppRoot extends LitElement {
       { 
         id: 'gmail',
         name: 'Gmail', 
-        icon: MessageSquare, 
+        icon: '/Gmail_icon_(2020).svg.png',
         connected: false, 
         hasToggle: false,
         provider: 'google',
@@ -510,7 +510,7 @@ export class AppRoot extends LitElement {
       { 
         id: 'instagram',
         name: 'Instagram', 
-        icon: MessageSquare, 
+        icon: '/Instagram_logo_2016.svg.png',
         connected: false, 
         hasToggle: false, 
         badge: 'Beta',
@@ -520,7 +520,7 @@ export class AppRoot extends LitElement {
       { 
         id: 'outlook',
         name: 'Outlook Mail', 
-        icon: MessageSquare, 
+        icon: '/microsoft-outlook-2025.png',
         connected: false, 
         hasToggle: false,
         provider: 'microsoft',
@@ -538,8 +538,8 @@ export class AppRoot extends LitElement {
               class="flex items-center justify-between px-2 py-1.5 hover:bg-white/5 rounded transition-all cursor-pointer group"
             >
               <div class="flex items-center gap-2">
-                <div class="w-5 h-5 rounded-full bg-[#2a2a2a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#333]">
-                  ${renderIcon(item.icon, `w-3 h-3 ${item.iconColor || 'text-gray-400'}`)}
+                <div class="w-5 h-5 rounded-full bg-[#2a2a2a] flex items-center justify-center flex-shrink-0 group-hover:bg-[#333] overflow-hidden">
+                  <img src="${item.icon}" alt="${item.name}" class="w-3.5 h-3.5 object-contain" />
                 </div>
                 <div class="flex items-center gap-1.5">
                   <span class="text-[11px] text-white">${item.name}</span>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth with Edge Functions</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .provider-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 12px 24px;
+            border-radius: 8px;
+            background: white;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .provider-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .provider-icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .token-display {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .user-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 20px;
+        }
+        
+        .user-info-content {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-details {
+            flex: 1;
+        }
+        
+        .user-details h3 {
+            margin: 0 0 5px 0;
+            color: #fff;
+        }
+        
+        .user-details p {
+            margin: 5px 0;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .api-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .api-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .api-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .result {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OAuth with Edge Functions</h1>
+        <p>Authenticate with your favorite services using Supabase Edge Functions</p>
+        
+        <div class="auth-section">
+            <h2>Connect Services</h2>
+            <div id="providers">
+                <button class="btn" onclick="startOAuth('google')">
+                    <img src="https://www.google.com/favicon.ico" alt="Google" class="provider-icon"> Sign in with Google
+                </button>
+                <button class="btn" onclick="startOAuth('github')">
+                    <img src="https://github.githubassets.com/favicons/favicon.png" alt="GitHub" class="provider-icon"> Sign in with GitHub
+                </button>
+                <button class="btn" onclick="startOAuth('microsoft')">
+                    <img src="https://www.microsoft.com/favicon.ico" alt="Microsoft" class="provider-icon"> Sign in with Microsoft
+                </button>
+            </div>
+        </div>
+        
+        <div id="userInfo" class="user-info" style="display: none;">
+            <div class="user-info-content">
+                <div class="user-info-header">
+                    <img id="userAvatar" src="" alt="User Avatar" class="user-avatar">
+                    <div class="user-details">
+                        <h3 id="userName">User Name</h3>
+                        <p id="userEmail">user@example.com</p>
+                        <p id="userProvider">Provider: Google</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="apiActions" class="api-actions" style="display: none;">
+            <h3>API Actions</h3>
+            <button class="api-btn" onclick="callApi('gmail')">Get Gmail Messages</button>
+            <button class="api-btn" onclick="callApi('calendar')">Get Calendar Events</button>
+            <button class="api-btn" onclick="callApi('drive')">List Drive Files</button>
+        </div>
+        
+        <div id="result" class="result" style="display: none;">
+            <h4>API Response:</h4>
+            <pre id="apiResult"></pre>
+        </div>
+        
+        <div id="status" class="status">
+            <p>Status: <span id="statusText">Ready to authenticate</span></p>
+        </div>
+    </div>
+    
+    <script>
+        const EDGE_FUNCTIONS_URL = 'https://your-project.supabase.co/functions/v1';
+        const SUPABASE_ANON_KEY = 'your-anon-key'; // In production, use environment variables
+        
+        async function startOAuth(provider) {
+            try {
+                const response = await fetch(`${EDGE_FUNCTIONS_URL}/oauth-start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        provider: provider,
+                        service: provider,
+                        scopes: getScopesForProvider(provider),
+                        redirect_uri: window.location.origin + '/callback'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.auth_url) {
+                    // Store state for CSRF protection
+                    localStorage.setItem('oauth_state', data.state);
+                    localStorage.setItem('oauth_provider', provider);
+                    
+                    // Redirect to OAuth provider
+                    window.location.href = data.auth_url;
+                }
+            } catch (error) {
+                console.error('OAuth start failed:', error);
+                updateStatus('Failed to start OAuth flow');
+            }
+        }
+        
+        function getScopesForProvider(provider) {
+            const scopes = {
+                google: [
+                    'https://www.googleapis.com/auth/gmail.readonly',
+                    'https://www.googleapis.com/auth/calendar.readonly',
+                    'https://www.googleapis.com/auth/drive.readonly'
+                ],
+                github: ['repo', 'user'],
+                microsoft: ['User.Read', 'Mail.Read', 'Calendars.Read']
+            };
+            
+            return scopes[provider] || ['openid', 'profile', 'email'];
+        }
+        
+        async function handleCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+            
+            if (error) {
+                updateStatus(`OAuth error: ${error}`);
+                return;
+            }
+            
+            if (code) {
+                try {
+                    const response = await fetch(`${EDGE_FUNCTIONS_URL}/oauth-callback`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        },
+                        body: JSON.stringify({
+                            code,
+                            state,
+                            redirect_uri: window.location.origin + '/callback'
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.access_token) {
+                        localStorage.setItem('access_token', data.access_token);
+                        localStorage.setItem('refresh_token', data.refresh_token);
+                        localStorage.setItem('user_info', JSON.stringify(data.user_info));
+                        
+                        updateStatus('Authentication successful!');
+                        showUserInfo(data.user_info);
+                        showApiActions();
+                    }
+                } catch (error) {
+                    console.error('OAuth callback failed:', error);
+                    updateStatus('Authentication failed');
+                }
+            }
+        }
+        
+        function showUserInfo(userInfo) {
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('userName').textContent = userInfo.name || 'User';
+            document.getElementById('userEmail').textContent = userInfo.email || 'No email';
+            document.getElementById('userProvider').textContent = `Provider: ${userInfo.provider || 'Unknown'}`;
+            
+            if (userInfo.avatar) {
+                document.getElementById('userAvatar').src = userInfo.avatar;
+            }
+        }
+        
+        function showApiActions() {
+            document.getElementById('apiActions').style.display = 'block';
+        }
+        
+        async function callApi(api) {
+            const accessToken = localStorage.getItem('access_token');
+            
+            if (!accessToken) {
+                updateStatus('Please authenticate first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${EDGE_FUNCTIONS_URL}/proxy`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        method: 'GET',
+                        url: getApiEndpoint(api),
+                        access_token: accessToken
+                    })
+                });
+                
+                const data = await response.json();
+                displayResult(data);
+            } catch (error) {
+                console.error('API call failed:', error);
+                updateStatus('API call failed');
+            }
+        }
+        
+        function getApiEndpoint(api) {
+            const endpoints = {
+                gmail: 'https://gmail.googleapis.com/gmail/v1/users/me/messages',
+                calendar: 'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+                drive: 'https://www.googleapis.com/drive/v3/files'
+            };
+            return endpoints[api] || '';
+        }
+        
+        function displayResult(data) {
+            const resultDiv = document.getElementById('result');
+            const resultPre = document.getElementById('apiResult');
+            
+            resultDiv.style.display = 'block';
+            resultPre.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('statusText').textContent = message;
+        }
+        
+        // Check for OAuth callback
+        if (window.location.pathname.includes('callback')) {
+            handleCallback();
+        }
+        
+        // Check for existing session
+        const userInfo = localStorage.getItem('user_info');
+        if (userInfo) {
+            showUserInfo(JSON.parse(userInfo));
+            showApiActions();
+        }
+    </script>
+</body>
+</html>
